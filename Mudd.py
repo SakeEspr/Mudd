@@ -5,7 +5,7 @@ import time
 from pynput import keyboard
 import pygame
 
-class Monkey:
+class CheemCheem:
     def __init__(self, canvas, image, x=None, y=None):
         self.canvas = canvas
         self.image = image
@@ -26,12 +26,12 @@ class Monkey:
         # Create canvas image
         self.sprite = canvas.create_image(self.x, self.y, image=self.image)
     
-    # Update position without monkey-to-monkey collision
-    def update(self, monkeys):
+    # Update position
+    def update(self, cheems):
         screen_width = self.canvas.winfo_screenwidth()
         screen_height = self.canvas.winfo_screenheight()
         
-        # Move monkey
+        # Move cheem
         self.x += self.vx
         self.y += self.vy
         
@@ -47,7 +47,7 @@ class Monkey:
         # Update sprite position
         self.canvas.coords(self.sprite, self.x, self.y)
 
-class MonkeyApp:
+class CheemApp:
     def __init__(self, root, double_interval=60):
         self.root = root
         self.double_interval = double_interval
@@ -57,11 +57,11 @@ class MonkeyApp:
         
         # Load monkey sound
         try:
-            self.monkey_sound = pygame.mixer.Sound("monkey.mp3")
-            print("🐵 Monkey sound loaded!")
+            self.cheem_sound = pygame.mixer.Sound("monkey.mp3")
+            print("🐵 Cheem Cheem sound loaded!")
         except Exception as e:
             print(f"Could not load monkey.mp3: {e}")
-            self.monkey_sound = None
+            self.cheem_sound = None
         
         # Remove window decorations
         self.root.overrideredirect(True)
@@ -84,12 +84,12 @@ class MonkeyApp:
         
         self.root.protocol("WM_DELETE_WINDOW", lambda: None)
         
-        # Placeholder monkey image
-        self.monkey_image = self.create_placeholder_monkey()
+        # Load Cheem image
+        self.cheem_image = self.load_cheem("cheem.png")
         
-        # Monkey list
-        self.monkeys = []
-        self.add_monkey()
+        # Cheem Cheem list
+        self.cheems = []
+        self.add_cheem()
         
         # Track doubling time
         self.last_double_time = time.time()
@@ -111,58 +111,50 @@ class MonkeyApp:
         self.listener = keyboard.Listener(on_press=on_press)
         self.listener.start()
     
-    def create_placeholder_monkey(self):
-        img = Image.new('RGBA', (50, 50), (0, 0, 0, 0))
-        from PIL import ImageDraw
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([5, 5, 45, 45], fill='brown')  # Head
-        draw.ellipse([15, 15, 22, 22], fill='white')  # Left eye
-        draw.ellipse([28, 15, 35, 22], fill='white')  # Right eye
-        draw.ellipse([17, 17, 20, 20], fill='black')  # Left pupil
-        draw.ellipse([30, 17, 33, 20], fill='black')  # Right pupil
-        draw.ellipse([20, 28, 30, 35], fill='tan')  # Snout
-        draw.arc([22, 30, 28, 34], 0, 180, fill='black', width=2)  # Smile
-        return ImageTk.PhotoImage(img)
-    
-    def load_custom_monkey(self, filepath):
+    def load_cheem(self, filepath):
         try:
             img = Image.open(filepath)
             img = img.resize((50, 50), Image.Resampling.LANCZOS)
-            self.monkey_image = ImageTk.PhotoImage(img)
-            print(f"Loaded custom monkey from {filepath}")
+            print(f"Loaded Cheem Cheem from {filepath}")
+            return ImageTk.PhotoImage(img)
         except Exception as e:
             print(f"Error loading image: {e}")
-            print("Using placeholder monkey instead")
+            print("Using placeholder brown circle instead")
+            img = Image.new('RGBA', (50, 50), (0, 0, 0, 0))
+            from PIL import ImageDraw
+            draw = ImageDraw.Draw(img)
+            draw.ellipse([0, 0, 50, 50], fill='brown')
+            return ImageTk.PhotoImage(img)
     
-    def add_monkey(self):
-        monkey = Monkey(self.canvas, self.monkey_image)
-        self.monkeys.append(monkey)
-        print(f"Monkeys on screen: {len(self.monkeys)}")
+    def add_cheem(self):
+        cheem = CheemCheem(self.canvas, self.cheem_image)
+        self.cheems.append(cheem)
+        print(f"Cheem Cheems on screen: {len(self.cheems)}")
     
     def animate(self):
-        for monkey in self.monkeys:
-            monkey.update(self.monkeys)
+        for cheem in self.cheems:
+            cheem.update(self.cheems)
         
         current_time = time.time()
         if current_time - self.last_double_time >= self.double_interval:
-            current_count = len(self.monkeys)
+            current_count = len(self.cheems)
             for _ in range(current_count):
-                self.add_monkey()
+                self.add_cheem()
             
             # Play sound once per doubling
-            if self.monkey_sound:
-                self.monkey_sound.play()
+            if self.cheem_sound:
+                self.cheem_sound.play()
             
             self.last_double_time = current_time
-            print(f"🐵 DOUBLED! Now {len(self.monkeys)} monkeys!")
+            print(f"🐵 DOUBLED! Now {len(self.cheems)} Cheem Cheems!")
         
         # Continue animation
         self.root.after(16, self.animate)
     
     def cleanup(self):
-        print("Goodbye monkeys!")
-        if self.monkey_sound:
-            self.monkey_sound.stop()
+        print("Goodbye Cheem Cheems!")
+        if self.cheem_sound:
+            self.cheem_sound.stop()
         pygame.mixer.quit()
         if hasattr(self, 'listener'):
             self.listener.stop()
@@ -172,12 +164,9 @@ class MonkeyApp:
 if __name__ == "__main__":
     root = tk.Tk()
     
-    # ⚙️ Set how fast monkeys double (in seconds)
-    DUPLICATION_INTERVAL = 1.0  # doubles every 1 second
+    # ⚙️ Set how fast Cheems double (in seconds)
+    DUPLICATION_INTERVAL = 1  # doubles every 1 second
     
-    app = MonkeyApp(root, double_interval=DUPLICATION_INTERVAL)
-    
-    # Optional: load your own monkey image
-    # app.load_custom_monkey("monkey.png")
+    app = CheemApp(root, double_interval=DUPLICATION_INTERVAL)
     
     root.mainloop()
